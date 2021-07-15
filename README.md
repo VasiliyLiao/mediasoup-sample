@@ -1,7 +1,12 @@
+# Depends
+
+it's base on https://github.com/mkhahani/mediasoup-sample-app
+
 # Mediasoup Sample App
 
 A minimal Client/Server app based on Mediasoup and Socket.io
-
+(many-to-many voices)
+(one-ton-many screenshare)
 
 ## Dependencies
 

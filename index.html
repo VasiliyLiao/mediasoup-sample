@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,78 +12,79 @@
   body {
     font: .9rem arial, serif;
   }
-  table {
-    width: 100%;
-    max-width: 800px;
-  }
-  table td {
-    width: 33.33%;
-    vertical-align: top;
-  }
-  fieldset {
-    min-height: 100%;
-    border: 1px solid silver;
-    padding: 10px;
-  }
+
   button {
     padding: 5px;
     margin: 5px;
   }
+
   video {
     width: 100%;
   }
+
   span {
     font-family: monospace;
   }
+
+  .sub-box {
+    border: solid 1px black; 
+  }
+
+  .box {
+    display: flex;
+    width: 1000px;
+    height: 500px;
+  }
+  .left {
+    width: 1000px;
+    border: solid 1px black;
+    box-sizing: border-box;
+  }
+  .right {
+    display: flex;
+    flex-direction: column;
+    width: 700px;
+    border: solid 1px black;
+    box-sizing: border-box;
+  }
 </style>
+
 <body>
-  <table>
-    <tr>
-      <td>
-        <div>Local</div>
-        <video id="local_video" controls autoplay playsinline></video>
-      </td>
-      <td>
-        <div>Remote</div>
-        <video id="remote_video" controls autoplay playsinline></video>
-      </td>
-    </tr>
-  </table>
-  <br>
-  <table>
-    <tr>
-      <td>
-        <fieldset id="fs_connection">
-          <legend>Connection</legend>
-          <div><button id="btn_connect">Connect</button> <span id="connection_status"></span></div>
-        </fieldset>
-      </td>
-      <td>
-        <fieldset id="fs_publish" disabled>
-          <legend>Publishing</legend>
-          <div><label><input type="checkbox" id="chk_simulcast"> Use Simulcast</label></div>
+  <div class="box">
+    <div class="left">
+      <!-- <video id="local_video" controls autoplay playsinline></video> -->
+      <video id="remote_video" controls autoplay playsinline></video>
+      <audio id="remote_voice" controls autoplay playsinline></audio>
+    </div>
+    <div class="right">
+      <div id="log_box" class="sub-box" style="height: 100px; overflow:auto; white-space: pre-line;">
+      </div>
+      <div id="user_box" class="sub-box" style="height: 300px; white-space: pre-line;">
+      </div>
+      <div class="sub-box" style="height: 200px;">
           <div>
-            <button id="btn_webcam">Start Webcam</button>
-            <span id="webcam_status"></span>
+            <button id="btn_connect">Connect</button> 
+            <span id="connection_status"></span>
           </div>
           <div>
+            <label>
+              <input type="checkbox" id="chk_simulcast"> Use Simulcast
+            </label>
             <button id="btn_screen">Share Screen</button>
             <span id="screen_status"></span>
           </div>
-        </fieldset>
-      </td>
-      <td>
-        <fieldset id="fs_subscribe" disabled>
-          <legend>Subscription</legend>
-          <div><button id="btn_subscribe">Subscribe</button> <span id="sub_status"></span></div>
-        </fieldset>
-      </td>
-    </tr>
-  </table>
+          <div>
+            <button id="btn_voice">Mute/Unmute Voice</button>
+            <span id="voice_status">mute</span>
+          </div>
+      </div>
+    </div>
+  </div>
 </body>
 <script>
   // window.localStorage.setItem('debug', 'mediasoup-client:WARN* mediasoup-client:ERROR*');
   window.localStorage.setItem('debug', 'mediasoup-client:*');
 </script>
 <script type="text/javascript" src="app-bundle.js"></script>
+
 </html>
