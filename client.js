@@ -16,17 +16,21 @@ const voiceConsumers = new Map();
 const $ = document.querySelector.bind(document);
 const $logBox = $('#log_box');
 const $userBox = $('#user_box');
+const $messageBox = $('#message_box');
 const $btnConnect = $('#btn_connect');
 const $btnScreen = $('#btn_screen');
 const $btnVoice = $('#btn_voice');
+const $btnMessage = $('#btn_message');
 const $chkSimulcast = $('#chk_simulcast');
 const $txtConnection = $('#connection_status');
 const $txtScreen = $('#screen_status');
 const $txtVoice = $('#voice_status');
+const $inputMessage = $('#inputMessage');
 
 $btnConnect.addEventListener('click', connect);
 $btnScreen.addEventListener('click', publishScreenShare);
 $btnVoice.addEventListener('click', muteOrUnmuteVoice);
+$btnMessage.addEventListener('click', sendMessage);
 
 if (typeof navigator.mediaDevices.getDisplayMedia === 'undefined') {
   $txtScreen.innerHTML = 'Not supported';
@@ -120,6 +124,11 @@ async function connect() {
 
   socket.on('log', (data) => {
     $logBox.append(`${data}\n`);
+  });
+
+  socket.on('message', (data) => {
+    const str = `${data.id}: ${data.message}\n`;
+    $messageBox.append(str);
   });
 
   socket.on('users', (users) => {
@@ -278,6 +287,12 @@ async function publishVoice() {
   }
 }
 
+async function sendMessage() {
+  const message = inputMessage.value;
+  inputMessage.value = '';
+  await socket.request('message', { message });
+}
+
 async function publishScreenShare(e) {
   const $txtPublish = $txtScreen;
   let stream = await getUserMedia(undefined, false);
@@ -342,7 +357,6 @@ async function publishScreenShare(e) {
       };
     }
     const data = await transport.produce(params);
-    console.log(data)
   } catch (err) {
     console.error(err);
     $txtPublish.innerHTML = 'failed';
@@ -362,7 +376,6 @@ async function getConsumer(producerId) {
     kind,
     rtpParameters,
   } = data;
-  console.log(id)
 
   let codecOptions = {};
   const consumer = await recvTransport.consume({

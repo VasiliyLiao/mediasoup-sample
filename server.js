@@ -416,6 +416,13 @@ async function runSocketServer() {
         return callback({ error });
       }
     });
+    
+    socket.on('message', (data, callback) => {
+      socketServer.emit('message', {
+        id: socket.id,
+        ...data,
+      });
+    })
   });
 }
 
