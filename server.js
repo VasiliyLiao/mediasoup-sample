@@ -139,7 +139,7 @@ async function runSocketServer() {
     socket.on('clientIsReady', () => {
       broadcastUsers();
       if (presenter.producer) {
-        socket.emit('newPresenter');
+        socket.emit('newPresenter', presenter.socketId);
       }
     })
 
@@ -220,14 +220,33 @@ async function runSocketServer() {
         presenter.producer = await presenter.producerTransport.produce({ kind, rtpParameters });
         callback({ id: presenter.producer.id });
   
-        socketServer.emit('newPresenter');
+        socketServer.emit('newPresenter', presenter.socketId);
         broadcastUsers();
         broadcastLog(`new presenter - ${socket.id}`)
       } catch(error) {
         console.error(error)
       }
-      
     });
+
+    socket.on('closePresenter', (data, callback) => {
+      if (presenter.socketId !== socket.id) {
+        callback({ error: new Error('not presenter') });
+        return;
+      }
+
+      presenter.producer.close();
+      presenter.producerTransport.close();
+      presenter.producerTransport = null;
+      presenter.producer = null;
+      presenter.socketId = null;
+
+      socketServer.emit('closePresenter', socket.id);
+      broadcastUsers();
+      broadcastLog(`close presenter - ${socket.id}`)
+
+      callback();
+    });
+
     socket.on('createPresenterConsumerTransport', async (data,callback) => {
       try {
         const { transport, params } = await createWebRtcTransport();

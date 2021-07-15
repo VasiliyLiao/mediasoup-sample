@@ -21,14 +21,13 @@ const $btnConnect = $('#btn_connect');
 const $btnScreen = $('#btn_screen');
 const $btnVoice = $('#btn_voice');
 const $btnMessage = $('#btn_message');
-const $chkSimulcast = $('#chk_simulcast');
 const $txtConnection = $('#connection_status');
 const $txtScreen = $('#screen_status');
 const $txtVoice = $('#voice_status');
 const $inputMessage = $('#inputMessage');
 
 $btnConnect.addEventListener('click', connect);
-$btnScreen.addEventListener('click', publishScreenShare);
+$btnScreen.addEventListener('click', shareOrNotShareScreen);
 $btnVoice.addEventListener('click', muteOrUnmuteVoice);
 $btnMessage.addEventListener('click', sendMessage);
 
@@ -147,11 +146,19 @@ async function connect() {
     $btnConnect.disabled = false;
   });
 
-  socket.on('newPresenter', () => {
+  socket.on('newPresenter', (presenterSocketId) => {
+    if (socket.id !== presenterSocketId) {
+      $txtScreen.innerHTML = 'none';
+    }
     if (isLoadDevice) {
       subscribeScreenShare().then().catch(error=>console.error(error))
     }
   });
+
+  socket.on('closePresenter', (presenterSocketId) => {
+      // nothing
+  })
+  
 }
 
 async function findOrCreateVideoAndAudioSendTransport() {
@@ -293,6 +300,33 @@ async function sendMessage() {
   await socket.request('message', { message });
 }
 
+let isScreenShare = false;
+let shareScreenSendTransport = null;
+let screenShareProducer = null;
+
+async function shareOrNotShareScreen() {
+  try {
+    if (isScreenShare) {
+      isScreenShare = false;
+      await socket.request('closePresenter');
+      if (screenShareProducer) {
+        await screenShareProducer.close();
+        screenShareProducer = null;
+      }
+      if (shareScreenSendTransport) {
+        await shareScreenSendTransport.close();
+        shareScreenSendTransport = null;
+      }
+      $txtScreen.innerHTML = 'none';
+    } else {
+      isScreenShare = true;
+      await publishScreenShare();
+    }
+  } catch(error) {
+    console.error(error);
+  }
+}
+
 async function publishScreenShare(e) {
   const $txtPublish = $txtScreen;
   let stream = await getUserMedia(undefined, false);
@@ -306,17 +340,17 @@ async function publishScreenShare(e) {
     return;
   }
 
-  const transport = device.createSendTransport(data);
-  transport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+  shareScreenSendTransport = device.createSendTransport(data);
+  shareScreenSendTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
     socket.request('connectPresenterProducerTransport', { dtlsParameters })
       .then(callback)
       .catch(errback);
   });
 
-  transport.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
+  shareScreenSendTransport.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
     try {
       const { id } = await socket.request('presenterProduce', {
-        transportId: transport.id,
+        transportId: shareScreenSendTransport.id,
         kind,
         rtpParameters,
       });
@@ -326,7 +360,7 @@ async function publishScreenShare(e) {
     }
   });
 
-  transport.on('connectionstatechange', (state) => {
+  shareScreenSendTransport.on('connectionstatechange', (state) => {
     switch (state) {
       case 'connecting':
         $txtPublish.innerHTML = 'publishing...';
@@ -335,7 +369,7 @@ async function publishScreenShare(e) {
         $txtPublish.innerHTML = 'published';
         break;
       case 'failed':
-        transport.close();
+        shareScreenSendTransport.close();
         $txtPublish.innerHTML = 'failed';
         break;
       default: 
@@ -346,17 +380,7 @@ async function publishScreenShare(e) {
   try {
     const track = stream.getVideoTracks()[0];
     const params = { track };
-    if ($chkSimulcast.checked) {
-      params.encodings = [
-        { maxBitrate: 100000 },
-        { maxBitrate: 300000 },
-        { maxBitrate: 900000 },
-      ];
-      params.codecOptions = {
-        videoGoogleStartBitrate : 1000
-      };
-    }
-    const data = await transport.produce(params);
+    screenShareProducer = await shareScreenSendTransport.produce(params);
   } catch (err) {
     console.error(err);
     $txtPublish.innerHTML = 'failed';
