@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png" href="mediasoup.png" />
+  <title>Mediasoup Sample App</title>
+</head>
+<style>
+  body {
+    font: .9rem arial, serif;
+  }
+
+  button {
+    padding: 5px;
+    margin: 5px;
+  }
+
+  video {
+    width: 100%;
+  }
+
+  span {
+    font-family: monospace;
+  }
+
+  .sub-box {
+    border: solid 1px black; 
+  }
+
+  .box {
+    display: flex;
+    width: 1300px;
+    height: 720px;
+  }
+  .message-box {
+    display: flex;
+    border: solid 1px black; 
+  }
+  .left {
+    width: 1000px;
+    border: solid 1px black;
+    box-sizing: border-box;
+  }
+  .right {
+    display: flex;
+    flex-direction: column;
+    width: 700px;
+    border: solid 1px black;
+    box-sizing: border-box;
+  }
+
+
+</style>
+
+<body>
+  <div class="box">
+    <div class="left">
+      <div>
+        <video id="remote_video" controls autoplay playsinline></video>
+        <audio id="remote_voice" controls autoplay playsinline></audio>
+      </div>
+      <div id='message_box' style="height: 270px; overflow:auto; white-space: pre-line;"></div>
+      <div>
+        <input id="inputMessage" class="inputMessage" placeholder="Type here..."/>
+        <button id="btn_message">Submit</button> 
+      </div>
+    </div>
+    <div class="right">
+      <div id="log_box" class="sub-box" style="height: 400px; overflow:auto; white-space: pre-line;">
+      </div>
+      <div id="user_box" class="sub-box" style="height: 300px; white-space: pre-line;">
+      </div>
+      <div class="sub-box" style="height: 200px;">
+          <div>
+            <button id="btn_connect">Connect</button> 
+            <span id="connection_status"></span>
+          </div>
+          <div>
+            <button id="btn_screen">Stop/Share Screen</button>
+            <span id="screen_status">none</span>
+          </div>
+          <div>
+            <button id="btn_voice">Mute/Unmute Voice</button>
+            <span id="voice_status">mute</span>
+          </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  // window.localStorage.setItem('debug', 'mediasoup-client:WARN* mediasoup-client:ERROR*');
+  window.localStorage.setItem('debug', 'mediasoup-client:*');
+</script>
+<script type="text/javascript" src="app-bundle.js"></script>
+
+</html>

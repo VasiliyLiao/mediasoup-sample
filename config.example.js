@@ -4,6 +4,7 @@ module.exports = {
   sslCrt: '/etc/ssl/certs/ssl-cert-snakeoil.pem',
   sslKey: '/etc/ssl/private/ssl-cert-snakeoil.key',
   mediasoup: {
+    numWorkers: 2,
     // Worker settings
     worker: {
       rtcMinPort: 10000,

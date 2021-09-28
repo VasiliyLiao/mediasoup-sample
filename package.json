@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --ignore 'app-bundle.js' --exec npm start",
-    "start": "browserify client.js -o app-bundle.js; node server.js"
+    "start": "browserify client.js -o app-bundle.js; node server.js",
+    "dev-parallel": "nodemon --ignore './parallel/web/app-bundle.js' --exec npm run start-parallel",
+    "start-parallel": "browserify ./parallel/web/client.js -o ./parallel/web/app-bundle.js; node ./parallel/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +15,7 @@
     "express": "^4.16.4",
     "mediasoup": "3",
     "mediasoup-client": "3",
+    "node-fetch": "^2",
     "socket.io": "^4.1.3",
     "socket.io-client": "^4.1.3"
   },
